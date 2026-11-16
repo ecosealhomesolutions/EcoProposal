@@ -35,6 +35,16 @@ final class CloudSyncState {
         var customerFingerprints: [UUID: String] = [:]
         var jobFingerprints: [UUID: String] = [:]
 
+        // Session 4: files
+        var uploadedPhotoImages: Set<UUID> = []
+        var photoFingerprints: [UUID: String] = [:]
+        var proposalPhotoIDs: [UUID: [UUID]] = [:]
+        var sketchFingerprints: [UUID: String] = [:]
+        var uploadedSignatures: Set<String> = []
+        var uploadedDocuments: Set<UUID> = []
+        var documentFingerprints: [UUID: String] = [:]
+        var proposalDocumentIDs: [UUID: [UUID]] = [:]
+
         init() {}
 
         init(from decoder: Decoder) throws {
@@ -56,6 +66,14 @@ final class CloudSyncState {
             scopeHTMLHashes = try c.decodeIfPresent([UUID: String].self, forKey: .scopeHTMLHashes) ?? [:]
             customerFingerprints = try c.decodeIfPresent([UUID: String].self, forKey: .customerFingerprints) ?? [:]
             jobFingerprints = try c.decodeIfPresent([UUID: String].self, forKey: .jobFingerprints) ?? [:]
+            uploadedPhotoImages = try c.decodeIfPresent(Set<UUID>.self, forKey: .uploadedPhotoImages) ?? []
+            photoFingerprints = try c.decodeIfPresent([UUID: String].self, forKey: .photoFingerprints) ?? [:]
+            proposalPhotoIDs = try c.decodeIfPresent([UUID: [UUID]].self, forKey: .proposalPhotoIDs) ?? [:]
+            sketchFingerprints = try c.decodeIfPresent([UUID: String].self, forKey: .sketchFingerprints) ?? [:]
+            uploadedSignatures = try c.decodeIfPresent(Set<String>.self, forKey: .uploadedSignatures) ?? []
+            uploadedDocuments = try c.decodeIfPresent(Set<UUID>.self, forKey: .uploadedDocuments) ?? []
+            documentFingerprints = try c.decodeIfPresent([UUID: String].self, forKey: .documentFingerprints) ?? [:]
+            proposalDocumentIDs = try c.decodeIfPresent([UUID: [UUID]].self, forKey: .proposalDocumentIDs) ?? [:]
         }
     }
 

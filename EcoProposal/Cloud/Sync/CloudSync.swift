@@ -34,9 +34,10 @@ final class CloudSync {
     /// True once the rep is signed in to EcoProposal Cloud on this iPad.
     var isActive: Bool { context != nil && profile != nil }
 
-    @ObservationIgnored private let client = SupabaseService.client
-    @ObservationIgnored private let state = CloudSyncState.shared
-    @ObservationIgnored private var context: ModelContext?
+    // Internal (not private) so the file-sync extension in CloudFileSync.swift can use them.
+    @ObservationIgnored let client = SupabaseService.client
+    @ObservationIgnored let state = CloudSyncState.shared
+    @ObservationIgnored private(set) var context: ModelContext?
     @ObservationIgnored private var autoSyncTask: Task<Void, Never>?
     @ObservationIgnored private var pushDebounce: Task<Void, Never>?
     @ObservationIgnored private var saveObserver: NSObjectProtocol?
@@ -182,6 +183,9 @@ final class CloudSync {
                 state.stored.notesFingerprints[id] = Self.notesFingerprint(p)
                 state.stored.proposalLineItemIDs[id] = p.lineItems.map(\.id)
             }
+
+            // Session 4: photos, sketches, signatures and attached PDFs
+            try await pullFiles(proposals: proposalMap, applied: applied, in: context)
 
             state.stored.libraryIDs = try await applyLibrary(library, in: context)
             state.stored.lastSyncedAt = Date()
@@ -556,11 +560,16 @@ final class CloudSync {
             if tracked && (state.stored.proposalFingerprints[p.id] ?? fp) == fp { continue }
             if conflicts.contains(p.id) { continue }
             if tracked && !canEdit(p.id) { continue }
-            // Signed proposals upload together with their signatures (session 4).
-            if !tracked && p.isLocked { continue }
             if let job = p.job, !state.stored.jobIDs.contains(job.id) { continue }
             do {
                 try await pushProposal(p, tracked: tracked, fingerprint: fp, numbers: numbers, profile: profile)
+            } catch { note(error) }
+        }
+
+        // 4. Files for every proposal that now exists in the cloud (signatures last: they lock it)
+        for p in proposals where state.stored.proposalIDs.contains(p.id) && canEdit(p.id) && !conflicts.contains(p.id) {
+            do {
+                try await pushFiles(for: p, profile: profile)
             } catch { note(error) }
         }
 
@@ -775,13 +784,13 @@ final class CloudSync {
         )
     }
 
-    private static func fingerprint<T: Encodable>(_ value: T) -> String {
+    static func fingerprint<T: Encodable>(_ value: T) -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         return hash((try? encoder.encode(value)) ?? Data())
     }
 
-    private static func hash(_ data: Data) -> String {
+    static func hash(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
