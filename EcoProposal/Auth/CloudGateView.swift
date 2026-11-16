@@ -23,15 +23,15 @@ struct CloudGateView<Content: View>: View {
                 CloudNotProvisionedView(cloud: cloud)
             case .ready:
                 content()
-                    // Session 2: download cloud data at launch and every 2 minutes.
-                    .task { CloudSync.shared.startAutoSync(context: modelContext) }
+                    // Two-way sync with EcoProposal Cloud while signed in.
+                    .task { CloudSync.shared.startAutoSync(context: modelContext, profile: cloud.profile) }
             }
         }
         .environment(cloud)
         .task { await cloud.start() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active, cloud.state == .ready {
-                Task { await CloudSync.shared.pullNow() }
+                Task { await CloudSync.shared.syncNow() }
             }
         }
     }

@@ -317,7 +317,8 @@ final class Proposal {
     @discardableResult
     func createNewVersion(in context: ModelContext) -> Proposal {
         let newProposal = Proposal(
-            proposalNumber: CompanyInfo.nextProposalNumber(),
+            // Signed in to EcoProposal Cloud: the database assigns the number on upload.
+            proposalNumber: CloudSync.shared.isActive ? "" : CompanyInfo.nextProposalNumber(),
             date: Date(),
             status: .draft,
             division: division,

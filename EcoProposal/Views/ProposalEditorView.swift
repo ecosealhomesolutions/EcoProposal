@@ -17,13 +17,36 @@ struct ProposalEditorView: View {
 
     var body: some View {
         List {
-            if CloudSyncState.shared.isCloudProposal(proposal.id) {
+            if CloudSync.shared.conflicts.contains(proposal.id) {
                 Section {
                     Label {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text("Synced from EcoProposal Cloud")
+                            Text("Changed on the website too")
                                 .font(.headline)
-                            Text("Edit this proposal on the EcoProposal website for now. Editing on iPad arrives with two-way sync.")
+                            Text("Someone edited this proposal on the website while you were editing it here. Choose which version to keep.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                    }
+                    Button("Use the website's version") {
+                        Task { await CloudSync.shared.useWebsiteVersion(proposal.id) }
+                    }
+                    Button("Keep my iPad changes") {
+                        Task { await CloudSync.shared.keepIPadVersion(proposal.id) }
+                    }
+                }
+            } else if !CloudSync.shared.canEdit(proposal.id) {
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(CloudSync.shared.isLockedInCloud(proposal.id) ? "Signed and locked" : "View only")
+                                .font(.headline)
+                            Text(CloudSync.shared.isLockedInCloud(proposal.id)
+                                 ? "This proposal was signed. To change it, create a new version on the website."
+                                 : "This proposal belongs to another rep. Ask them or a manager to add you as a collaborator to edit it.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -63,7 +86,7 @@ struct ProposalEditorView: View {
                 PhotosSection(proposal: proposal)
                 LiteratureSection(proposal: proposal)
             }
-            .disabled(proposal.isLocked || proposal.isArchived || CloudSyncState.shared.isCloudProposal(proposal.id))
+            .disabled(proposal.isLocked || proposal.isArchived || !CloudSync.shared.canEdit(proposal.id))
             reviewSection
         }
         .listStyle(.insetGrouped)
@@ -81,7 +104,7 @@ struct ProposalEditorView: View {
         } message: {
             Text("This archives the signed contract and starts a fresh editable copy with the same customer, line items, photos, and sketch. Signatures are not carried over.")
         }
-        .navigationTitle(proposal.proposalNumber)
+        .navigationTitle(proposal.proposalNumber.isEmpty ? "Number pending" : proposal.proposalNumber)
         .iosInlineNavigationTitle()
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -199,7 +222,7 @@ struct ProposalEditorView: View {
 
     private var headerSection: some View {
         Section {
-            LabeledContent("Proposal #", value: proposal.proposalNumber)
+            LabeledContent("Proposal #", value: proposal.proposalNumber.isEmpty ? "Assigned when synced" : proposal.proposalNumber)
             DatePicker("Date", selection: $proposal.date, displayedComponents: .date)
             Picker("Status", selection: Binding(get: { proposal.status }, set: { proposal.status = $0 })) {
                 ForEach(ProposalStatus.allCases) { status in

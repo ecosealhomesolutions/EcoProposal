@@ -102,6 +102,10 @@ nonisolated struct CloudJob: Decodable, Sendable {
 
 nonisolated struct CloudProposal: Decodable, Sendable {
     let id: UUID
+    let owner_id: UUID?
+    let collaborator_ids: [UUID]?
+    let version: Int
+    let scope_html: String?
     let job_id: UUID?
     let number: String?
     let proposal_date: String
@@ -136,4 +140,19 @@ nonisolated struct CloudLibraryDocument: Decodable, Sendable {
     let title: String
     let file_path: String
     let auto_attach_rule: String?
+}
+
+/// What the database sends back after a proposal insert/update.
+nonisolated struct CloudProposalAck: Decodable, Sendable {
+    let id: UUID
+    let number: String?
+    let version: Int
+    let locked_at: String?
+}
+
+/// Current version of a proposal (used to tell a conflict from a permission problem).
+nonisolated struct CloudVersionRow: Decodable, Sendable {
+    let id: UUID
+    let version: Int
+    let locked_at: String?
 }

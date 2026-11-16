@@ -57,7 +57,7 @@ struct SettingsView: View {
                             .foregroundStyle(.red)
                     }
                     Button {
-                        Task { await CloudSync.shared.pullNow() }
+                        Task { await CloudSync.shared.syncNow() }
                     } label: {
                         if CloudSync.shared.isSyncing {
                             HStack { ProgressView(); Text("Syncing…") }

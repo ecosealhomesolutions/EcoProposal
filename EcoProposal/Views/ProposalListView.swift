@@ -39,7 +39,7 @@ struct ProposalListView: View {
                 }
             }
         }
-        .refreshable { await CloudSync.shared.pullNow() }
+        .refreshable { await CloudSync.shared.syncNow() }
         .navigationTitle("Proposals")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -68,7 +68,8 @@ struct ProposalListView: View {
     private func addProposal(in division: Division) {
         let company = CompanyInfo.load()
         let proposal = Proposal(
-            proposalNumber: CompanyInfo.nextProposalNumber(),
+            // Signed in to EcoProposal Cloud: the database assigns the number on upload.
+            proposalNumber: CloudSync.shared.isActive ? "" : CompanyInfo.nextProposalNumber(),
             date: Date(),
             status: .draft,
             division: division,
@@ -97,7 +98,7 @@ private struct ProposalRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
-                Text(proposal.proposalNumber)
+                Text(proposal.proposalNumber.isEmpty ? "Number pending" : proposal.proposalNumber)
                     .font(.headline)
                 if proposal.isArchived {
                     Image(systemName: "archivebox.fill")
