@@ -17,6 +17,22 @@ struct ProposalEditorView: View {
 
     var body: some View {
         List {
+            if CloudSyncState.shared.isCloudProposal(proposal.id) {
+                Section {
+                    Label {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Synced from EcoProposal Cloud")
+                                .font(.headline)
+                            Text("Edit this proposal on the EcoProposal website for now. Editing on iPad arrives with two-way sync.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "icloud.fill")
+                            .foregroundStyle(Color.ecoBlue)
+                    }
+                }
+            }
             if proposal.isLocked || proposal.isArchived {
                 lockBanner
             }
@@ -47,7 +63,7 @@ struct ProposalEditorView: View {
                 PhotosSection(proposal: proposal)
                 LiteratureSection(proposal: proposal)
             }
-            .disabled(proposal.isLocked || proposal.isArchived)
+            .disabled(proposal.isLocked || proposal.isArchived || CloudSyncState.shared.isCloudProposal(proposal.id))
             reviewSection
         }
         .listStyle(.insetGrouped)
@@ -276,7 +292,12 @@ struct ProposalEditorView: View {
         }
     }
 
-    private let salesRepRoster = [
+    /// Reps from EcoProposal Cloud (active sales reps, managers, admins); built-in list until the first sync.
+    private var salesRepRoster: [String] {
+        CloudSyncState.shared.salesRepNames(fallback: Self.fallbackSalesRepRoster)
+    }
+
+    private static let fallbackSalesRepRoster = [
         "Caleb Palmer",
         "Dan Yoder",
         "Michael Arnold",

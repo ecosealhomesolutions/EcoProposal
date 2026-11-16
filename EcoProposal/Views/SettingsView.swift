@@ -44,6 +44,28 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     LabeledContent("Role", value: profile.roleDisplayName)
+                    LabeledContent("Last synced") {
+                        if let synced = CloudSyncState.shared.lastSyncedAt {
+                            Text(synced, format: .relative(presentation: .named))
+                        } else {
+                            Text("Not yet")
+                        }
+                    }
+                    if let syncError = CloudSync.shared.lastError {
+                        Text("Sync problem: \(syncError)")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                    Button {
+                        Task { await CloudSync.shared.pullNow() }
+                    } label: {
+                        if CloudSync.shared.isSyncing {
+                            HStack { ProgressView(); Text("Syncing…") }
+                        } else {
+                            Label("Sync now", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .disabled(CloudSync.shared.isSyncing)
                     Button(role: .destructive) {
                         Task { await cloud?.signOut() }
                     } label: {

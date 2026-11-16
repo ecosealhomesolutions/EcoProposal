@@ -96,6 +96,7 @@ final class CloudSession {
     }
 
     func signOut() async {
+        CloudSync.shared.stopAutoSync()
         try? await client.auth.signOut()
         UserDefaults.standard.removeObject(forKey: Self.cachedProfileKey)
         profile = nil

@@ -27,7 +27,12 @@ struct ProposalPDFPreviewView: View {
         BillingContact(name: "Ellie Miller", email: "ellie@ecosealsolutions.com"),
     ]
 
-    private let salesRepRoster = [
+    /// Reps from EcoProposal Cloud (active sales reps, managers, admins); built-in list until the first sync.
+    private var salesRepRoster: [String] {
+        CloudSyncState.shared.salesRepNames(fallback: Self.fallbackSalesRepRoster)
+    }
+
+    private static let fallbackSalesRepRoster = [
         "Caleb Palmer",
         "Dan Yoder",
         "Michael Arnold",

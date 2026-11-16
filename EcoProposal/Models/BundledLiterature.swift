@@ -34,6 +34,8 @@ enum BundledLiterature {
     /// Inserts any bundled brochure that isn't already in the library.
     @MainActor
     static func seed(into context: ModelContext) {
+        // Once the company library lives in EcoProposal Cloud, it replaces the bundled set.
+        if CloudSyncState.shared.hasCloudLibrary { return }
         let existing: Set<String> = {
             let all = (try? context.fetch(FetchDescriptor<LibraryDocument>())) ?? []
             return Set(all.map(\.filename))

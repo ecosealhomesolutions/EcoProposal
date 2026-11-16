@@ -15,5 +15,14 @@ enum SupabaseService {
     /// Authentication → URL Configuration → Redirect URLs.
     static let authRedirectURL = URL(string: "ecoproposal://login-callback")!
 
-    static let client = SupabaseClient(supabaseURL: url, supabaseKey: publishableKey)
+    static let client = SupabaseClient(
+        supabaseURL: url,
+        supabaseKey: publishableKey,
+        options: SupabaseClientOptions(
+            // Opt in to the library's upcoming default (silences its console warning).
+            // CloudSession always validates/refreshes the session itself, so an
+            // expired saved session is handled either way.
+            auth: SupabaseClientOptions.AuthOptions(emitLocalSessionAsInitialSession: true)
+        )
+    )
 }

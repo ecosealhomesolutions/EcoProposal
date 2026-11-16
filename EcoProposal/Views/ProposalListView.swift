@@ -39,6 +39,7 @@ struct ProposalListView: View {
                 }
             }
         }
+        .refreshable { await CloudSync.shared.pullNow() }
         .navigationTitle("Proposals")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -82,6 +83,8 @@ struct ProposalListView: View {
     private func deleteProposals(from list: [Proposal], at offsets: IndexSet) {
         withAnimation {
             for index in offsets {
+                // Cloud proposals are deleted on the website (they'd come back on the next sync).
+                guard !CloudSyncState.shared.isCloudProposal(list[index].id) else { continue }
                 modelContext.delete(list[index])
             }
         }
@@ -104,6 +107,12 @@ private struct ProposalRow: View {
                     Image(systemName: "lock.fill")
                         .foregroundStyle(Color.ecoGreen)
                         .font(.caption)
+                }
+                if CloudSyncState.shared.isCloudProposal(proposal.id) {
+                    Image(systemName: "icloud.fill")
+                        .foregroundStyle(Color.ecoBlue)
+                        .font(.caption)
+                        .accessibilityLabel("Synced from EcoProposal Cloud")
                 }
                 Spacer()
                 if proposal.isArchived {

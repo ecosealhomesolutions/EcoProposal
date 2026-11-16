@@ -5,6 +5,8 @@ import SwiftUI
 /// Microsoft account, so it is usually a single tap.
 struct CloudGateView<Content: View>: View {
     @State private var cloud = CloudSession()
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -21,10 +23,17 @@ struct CloudGateView<Content: View>: View {
                 CloudNotProvisionedView(cloud: cloud)
             case .ready:
                 content()
+                    // Session 2: download cloud data at launch and every 2 minutes.
+                    .task { CloudSync.shared.startAutoSync(context: modelContext) }
             }
         }
         .environment(cloud)
         .task { await cloud.start() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active, cloud.state == .ready {
+                Task { await CloudSync.shared.pullNow() }
+            }
+        }
     }
 }
 
