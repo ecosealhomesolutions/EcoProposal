@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "272D1E57-66E4-436E-968B-8CBEA3D1C8E8",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:EcoProposal.xcodeproj",
+      "identifier" : "84270F9A301A8779001797FE",
+      "name" : "EcoProposal"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:EcoProposal.xcodeproj",
+        "identifier" : "84270FA9301A877A001797FE",
+        "name" : "EcoProposalTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:EcoProposal.xcodeproj",
+        "identifier" : "84270FB3301A877A001797FE",
+        "name" : "EcoProposalUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
