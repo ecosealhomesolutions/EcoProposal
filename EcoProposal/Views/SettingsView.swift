@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(CloudSession.self) private var cloud: CloudSession?
 
     @AppStorage(CompanyInfo.Keys.taxRate) private var taxRate: Double = 0
     @AppStorage(CompanyInfo.Keys.terms)   private var terms: String   = CompanyInfo.fallbackTerms
@@ -32,6 +33,26 @@ struct SettingsView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.vertical, 4)
+            }
+            Section("EcoProposal Cloud") {
+                if let profile = cloud?.profile {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Label(profile.fullName, systemImage: "person.crop.circle.fill")
+                            .font(.headline)
+                        Text(profile.email)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Role", value: profile.roleDisplayName)
+                    Button(role: .destructive) {
+                        Task { await cloud?.signOut() }
+                    } label: {
+                        Label("Sign out of EcoProposal Cloud", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                } else {
+                    Text("Not connected")
+                        .foregroundStyle(.secondary)
+                }
             }
             Section("Proposal defaults") {
                 HStack {

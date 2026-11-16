@@ -41,7 +41,10 @@ struct EcoProposalApp: App {
             // Everything sits behind the Microsoft 365 login gate — only
             // @ecosealsolutions.com accounts can open the app.
             AuthGateView {
-                ContentView()
+                // Phase 3: connect to EcoProposal Cloud (Supabase) after the M365 gate.
+                CloudGateView {
+                    ContentView()
+                }
             }
             .tint(.ecoGreen)
             .onOpenURL { url in

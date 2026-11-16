@@ -24,9 +24,8 @@ enum ProposalPDFRenderer {
     /// vector/selectable.
     static func renderPDF(for proposal: Proposal, company: CompanyInfo) throws -> URL {
         let snapshot = ProposalSnapshot(from: proposal)
-        let sanitizedNumber = proposal.proposalNumber.replacingOccurrences(of: "/", with: "-")
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("Proposal-\(sanitizedNumber).pdf")
+            .appendingPathComponent("\(proposal.pdfBaseName).pdf")
         try render(snapshot: snapshot, company: company, to: url)
         return url
     }
@@ -51,9 +50,10 @@ enum ProposalPDFRenderer {
         targetBytes: Int = uploadTargetBytes
     ) throws -> (url: URL, bytes: Int) {
         let snapshot = ProposalSnapshot(from: proposal)
-        let sanitizedNumber = proposal.proposalNumber.replacingOccurrences(of: "/", with: "-")
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("Proposal-\(sanitizedNumber)-upload.pdf")
+        // Same customer-facing name as the full PDF, kept in its own folder so the two don't collide.
+        let uploadDir = FileManager.default.temporaryDirectory.appendingPathComponent("upload", isDirectory: true)
+        try? FileManager.default.createDirectory(at: uploadDir, withIntermediateDirectories: true)
+        let url = uploadDir.appendingPathComponent("\(proposal.pdfBaseName).pdf")
 
         var bytes = 0
         for step in compressionSteps {
@@ -329,5 +329,65 @@ enum ProposalPDFRenderer {
             drawer(pdfContext)
             pdfContext.endPDFPage()
         }
+    }
+}
+
+// MARK: - PDF file naming
+
+extension Proposal {
+    /// Customer-facing PDF file name without extension: `LastName_F_MMddyy`,
+    /// e.g. "Smith_J_111626" for John Smith on a proposal dated Nov 16, 2026.
+    /// Falls back to the company name, then the proposal number, when the
+    /// customer has no usable name. Used for share, email and OneDrive uploads.
+    var pdfBaseName: String {
+        let datePart: String = {
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = "MMddyy"
+            return f.string(from: date)
+        }()
+
+        let customer = job?.customer
+        let fullName = (customer?.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+
+        var last = ""
+        var firstInitial = ""
+        if fullName.contains(",") {
+            // "Smith, John"
+            let parts = fullName.split(separator: ",", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
+            last = parts.first ?? ""
+            firstInitial = String(parts.count > 1 ? parts[1].prefix(1) : "")
+        } else {
+            var words = fullName.split(whereSeparator: { $0.isWhitespace }).map(String.init)
+            let suffixes: Set<String> = ["jr", "jr.", "sr", "sr.", "ii", "iii", "iv"]
+            if words.count > 2, let tail = words.last, suffixes.contains(tail.lowercased()) {
+                words.removeLast()
+            }
+            if words.count >= 2 {
+                last = words.last ?? ""
+                firstInitial = String(words.first?.prefix(1) ?? "")
+            } else {
+                last = words.first ?? ""
+            }
+        }
+
+        if last.isEmpty, let company = customer?.companyName, !company.isEmpty {
+            last = company
+        }
+
+        let cleanLast = Self.fileSafe(last)
+        let cleanInitial = Self.fileSafe(firstInitial).uppercased()
+
+        if cleanLast.isEmpty {
+            let number = Self.fileSafe(proposalNumber)
+            return number.isEmpty ? "Proposal_\(datePart)" : "\(number)_\(datePart)"
+        }
+        return cleanInitial.isEmpty ? "\(cleanLast)_\(datePart)" : "\(cleanLast)_\(cleanInitial)_\(datePart)"
+    }
+
+    /// Keeps letters, digits and hyphens; drops apostrophes and everything else
+    /// ("O'Brien" -> "OBrien", "Van Dyke" -> "VanDyke").
+    private static func fileSafe(_ text: String) -> String {
+        String(text.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) || $0 == "-" })
     }
 }

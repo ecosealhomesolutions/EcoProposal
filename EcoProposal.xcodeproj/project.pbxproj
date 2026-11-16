@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4CE675C930AB9D31007BE6BA /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 4CE675C830AB9D31007BE6BA /* Supabase */; };
 		84ED6630301CD5D100B70932 /* MSAL in Frameworks */ = {isa = PBXBuildFile; productRef = 84ED662F301CD5D100B70932 /* MSAL */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CE675C930AB9D31007BE6BA /* Supabase in Frameworks */,
 				84ED6630301CD5D100B70932 /* MSAL in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,6 +93,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4CE675C730AB9D24007BE6BA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		84270F92301A8779001797FE = {
 			isa = PBXGroup;
 			children = (
@@ -98,6 +107,7 @@
 				84270F9D301A8779001797FE /* EcoProposal */,
 				84270FAD301A877A001797FE /* EcoProposalTests */,
 				84270FB7301A877A001797FE /* EcoProposalUITests */,
+				4CE675C730AB9D24007BE6BA /* Frameworks */,
 				84270F9C301A8779001797FE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,6 +143,7 @@
 			name = EcoProposal;
 			packageProductDependencies = (
 				84ED662F301CD5D100B70932 /* MSAL */,
+				4CE675C830AB9D31007BE6BA /* Supabase */,
 			);
 			productName = EcoProposal;
 			productReference = 84270F9B301A8779001797FE /* EcoProposal.app */;
@@ -218,6 +229,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				84ED662E301CD5D100B70932 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */,
+				4CE675C030AB9B4E007BE6BA /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 84270F9C301A8779001797FE /* Products */;
@@ -641,6 +653,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4CE675C030AB9B4E007BE6BA /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
 		84ED662E301CD5D100B70932 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AzureAD/microsoft-authentication-library-for-objc";
@@ -652,6 +672,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		4CE675C830AB9D31007BE6BA /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CE675C030AB9B4E007BE6BA /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
 		84ED662F301CD5D100B70932 /* MSAL */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84ED662E301CD5D100B70932 /* XCRemoteSwiftPackageReference "microsoft-authentication-library-for-objc" */;
