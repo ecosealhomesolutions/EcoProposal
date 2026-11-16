@@ -77,6 +77,13 @@ nonisolated struct CloudProfileRow: Decodable, Sendable {
     let active: Bool
 }
 
+/// A person an admin added on the website who hasn't signed in yet.
+nonisolated struct CloudInvitationRow: Decodable, Sendable {
+    let full_name: String
+    let role: String
+    let accepted_at: String?
+}
+
 nonisolated struct CloudCustomer: Decodable, Sendable {
     let id: UUID
     let name: String

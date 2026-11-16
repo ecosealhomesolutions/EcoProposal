@@ -73,7 +73,7 @@ struct ProposalListView: View {
     private func addProposal(in division: Division) {
         let company = CompanyInfo.load()
         let proposal = Proposal(
-            // Signed in to EcoProposal Cloud: the database assigns the number on upload.
+            // Signed in to EcoPRO Cloud: the database assigns the number on upload.
             proposalNumber: CloudSync.shared.isActive ? "" : CompanyInfo.nextProposalNumber(),
             date: Date(),
             status: .draft,
@@ -118,7 +118,7 @@ private struct ProposalRow: View {
                     Image(systemName: "icloud.fill")
                         .foregroundStyle(Color.ecoBlue)
                         .font(.caption)
-                        .accessibilityLabel("Synced from EcoProposal Cloud")
+                        .accessibilityLabel("Synced from EcoPRO Cloud")
                 }
                 Spacer()
                 if proposal.isArchived {

@@ -44,7 +44,7 @@ final class CloudSession {
     enum State: Equatable {
         case checking        // launch: looking for a saved session
         case signedOut       // needs "Continue with Microsoft"
-        case notProvisioned  // signed in, but no active EcoProposal profile
+        case notProvisioned  // signed in, but no active EcoPRO profile
         case ready           // signed in with an active profile
     }
 
@@ -89,7 +89,7 @@ final class CloudSession {
             if let webError = error as? ASWebAuthenticationSessionError, webError.code == .canceledLogin {
                 return  // rep closed the sign-in sheet
             }
-            errorMessage = "Couldn't connect to EcoProposal Cloud. \(error.localizedDescription)"
+            errorMessage = "Couldn't connect to EcoPRO Cloud. \(error.localizedDescription)"
             return
         }
         await refreshProfile(showErrors: true)
@@ -137,7 +137,7 @@ final class CloudSession {
                 // Signed in but couldn't reach the server and nothing cached yet.
                 state = .signedOut
                 if showErrors {
-                    errorMessage = "Couldn't reach EcoProposal Cloud. Check your connection and try again."
+                    errorMessage = "Couldn't reach EcoPRO Cloud. Check your connection and try again."
                 }
             }
             // Otherwise: offline with a cached profile, keep working.

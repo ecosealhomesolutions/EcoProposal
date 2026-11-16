@@ -12,6 +12,8 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>EcoPRO</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,9 +47,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>EcoProposal uses the camera so you can attach job-site photos to a proposal.</string>
+	<string>EcoPRO uses the camera so you can attach job-site photos to a proposal.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>EcoProposal reads photos you select to attach them to a proposal.</string>
+	<string>EcoPRO reads photos you select to attach them to a proposal.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

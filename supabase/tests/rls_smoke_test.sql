@@ -32,6 +32,8 @@ begin
   begin  -- everything in this block is rolled back at the end
 
     -- ------------------------------------------------------------ T1 sign-up rules
+    -- (open sign-up on for this test only; everything here is rolled back)
+    update public.organizations set open_signup = true;
     insert into auth.users (id, email, raw_user_meta_data) values
       (u_admin,   'test.admin@ecosealsolutions.com',   '{"full_name":"Test Admin"}'),
       (u_rep1,    'test.rep1@ecosealsolutions.com',    '{"full_name":"Rep One"}'),

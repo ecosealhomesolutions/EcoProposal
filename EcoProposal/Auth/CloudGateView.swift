@@ -23,7 +23,7 @@ struct CloudGateView<Content: View>: View {
                 CloudNotProvisionedView(cloud: cloud)
             case .ready:
                 content()
-                    // Two-way sync with EcoProposal Cloud while signed in.
+                    // Two-way sync with EcoPRO Cloud while signed in.
                     .task { CloudSync.shared.startAutoSync(context: modelContext, profile: cloud.profile) }
             }
         }
@@ -49,10 +49,10 @@ private struct CloudConnectView: View {
                     .font(.system(size: 56))
                     .foregroundStyle(Color.ecoGreen)
                 VStack(spacing: 8) {
-                    Text("Connect to EcoProposal Cloud")
+                    Text("Connect to EcoPRO Cloud")
                         .font(.title.weight(.bold))
                         .foregroundStyle(.white)
-                    Text("Proposals, customers and the literature library sync between this iPad and the EcoProposal website. Use your Eco Seal Microsoft account.")
+                    Text("Proposals, customers and the literature library sync between this iPad and the EcoPRO website. Use your Eco Seal Microsoft account.")
                         .font(.callout)
                         .foregroundStyle(.white.opacity(0.75))
                         .multilineTextAlignment(.center)
@@ -104,7 +104,7 @@ private struct CloudNotProvisionedView: View {
                 Text("Your account isn't set up yet")
                     .font(.title2.weight(.bold))
                     .foregroundStyle(.white)
-                Text("You're signed in, but you don't have an active EcoProposal profile. Ask an administrator to set up your account.")
+                Text("You're signed in, but you don't have an active EcoPRO profile. Ask an administrator to set up your account.")
                     .font(.callout)
                     .foregroundStyle(.white.opacity(0.75))
                     .multilineTextAlignment(.center)

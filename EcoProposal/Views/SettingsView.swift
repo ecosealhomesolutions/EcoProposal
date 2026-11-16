@@ -34,7 +34,7 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
                 .padding(.vertical, 4)
             }
-            Section("EcoProposal Cloud") {
+            Section("EcoPRO Cloud") {
                 if let profile = cloud?.profile {
                     VStack(alignment: .leading, spacing: 4) {
                         Label(profile.fullName, systemImage: "person.crop.circle.fill")
@@ -69,7 +69,7 @@ struct SettingsView: View {
                     Button(role: .destructive) {
                         Task { await cloud?.signOut() }
                     } label: {
-                        Label("Sign out of EcoProposal Cloud", systemImage: "rectangle.portrait.and.arrow.right")
+                        Label("Sign out of EcoPRO Cloud", systemImage: "rectangle.portrait.and.arrow.right")
                     }
                 } else {
                     Text("Not connected")
@@ -78,7 +78,7 @@ struct SettingsView: View {
             }
             Section("Proposal defaults") {
                 if CloudSync.shared.isActive {
-                    Label("Set by your admin on the EcoProposal website", systemImage: "icloud")
+                    Label("Set by your admin on the EcoPRO website", systemImage: "icloud")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

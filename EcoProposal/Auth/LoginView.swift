@@ -20,7 +20,7 @@ struct LoginView: View {
                     )
 
                 VStack(spacing: 8) {
-                    Text("EcoProposal")
+                    Text("EcoPRO")
                         .font(.largeTitle.weight(.bold))
                         .foregroundStyle(.white)
                     Text("Sign in with your Eco Seal Solutions account to continue.")

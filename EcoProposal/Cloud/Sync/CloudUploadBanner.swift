@@ -16,7 +16,7 @@ struct CloudUploadBanner: View {
                             .foregroundStyle(.orange)
                     }
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(sync.lastError == nil ? "Uploading to EcoProposal Cloud" : "Waiting to upload")
+                        Text(sync.lastError == nil ? "Uploading to EcoPRO Cloud" : "Waiting to upload")
                             .font(.subheadline.weight(.semibold))
                         Text("\(sync.pendingUploads) proposal\(sync.pendingUploads == 1 ? "" : "s") left. Keep the app open until this finishes.")
                             .font(.caption)

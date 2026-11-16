@@ -166,11 +166,19 @@ final class CloudSync {
             let lineItems: [CloudLineItem] = try await fetchAll("line_items", columns: "id, proposal_id, description, quantity, unit, unit_price, sort_order")
             let library: [CloudLibraryDocument] = try await fetchAll("library_documents", columns: "id, title, file_path, auto_attach_rule")
 
+            // Reps an admin added on the website but who haven't signed in yet.
+            // (try? so an older database without this table never blocks sync)
+            let invites: [CloudInvitationRow] = (try? await fetchAll("user_invitations", columns: "full_name, role, accepted_at")) ?? []
+
             applyCompanyDefaults(org.first)
-            state.stored.salesRepNames = profiles
-                .filter { $0.active && ["sales_rep", "manager", "admin"].contains($0.role) && !$0.full_name.isEmpty }
+            let repRoles: Set<String> = ["sales_rep", "manager", "admin"]
+            let signedIn = profiles
+                .filter { $0.active && repRoles.contains($0.role) && !$0.full_name.isEmpty }
                 .map(\.full_name)
-                .sorted()
+            let invited = invites
+                .filter { $0.accepted_at == nil && repRoles.contains($0.role) && !$0.full_name.isEmpty }
+                .map(\.full_name)
+            state.stored.salesRepNames = Array(Set(signedIn + invited)).sorted()
 
             let customerMap = try applyCustomers(customers, in: context)
             let jobMap = try applyJobs(jobs, customers: customerMap, in: context)
