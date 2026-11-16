@@ -77,6 +77,11 @@ struct SettingsView: View {
                 }
             }
             Section("Proposal defaults") {
+                if CloudSync.shared.isActive {
+                    Label("Set by your admin on the EcoProposal website", systemImage: "icloud")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 HStack {
                     Text("Default tax rate")
                     Spacer()
@@ -91,6 +96,7 @@ struct SettingsView: View {
                     .iosKeyboardType(.decimal)
                     .multilineTextAlignment(.trailing)
                     .frame(width: 80)
+                    .disabled(CloudSync.shared.isActive)
                     Text("%")
                 }
                 VStack(alignment: .leading, spacing: 6) {
@@ -98,6 +104,7 @@ struct SettingsView: View {
                         .font(.subheadline)
                     TextField("Terms", text: $terms, axis: .vertical)
                         .lineLimit(4...12)
+                        .disabled(CloudSync.shared.isActive)
                 }
             }
             Section {
@@ -112,9 +119,6 @@ struct SettingsView: View {
             Section {
                 NavigationLink("OneDrive") {
                     OneDriveSettingsView()
-                }
-                NavigationLink("Quickbase (coming soon)") {
-                    QuickbasePlaceholderView()
                 }
             } header: {
                 Text("Integrations")
@@ -204,16 +208,3 @@ private struct OneDriveSettingsView: View {
     }
 }
 
-private struct QuickbasePlaceholderView: View {
-    var body: some View {
-        List {
-            Section {
-                Label("Not yet connected", systemImage: "cloud.slash")
-                Text("Quickbase sync will be enabled once realm, table, and token details are configured.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .navigationTitle("Quickbase")
-    }
-}

@@ -9,6 +9,11 @@ struct ProposalListView: View {
 
     var body: some View {
         List(selection: $selection) {
+            if CloudSync.shared.pendingUploads > 0 || !CloudSync.shared.conflicts.isEmpty {
+                Section {
+                    CloudUploadBanner()
+                }
+            }
             if proposals.isEmpty {
                 ContentUnavailableView(
                     "No Proposals Yet",

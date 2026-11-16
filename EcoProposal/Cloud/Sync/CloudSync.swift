@@ -30,6 +30,8 @@ final class CloudSync {
     /// Proposals edited on both the iPad and the website since the last sync.
     private(set) var conflicts: Set<UUID> = []
     private(set) var profile: CloudProfile?
+    /// Proposals on this iPad that still have something to upload (record or files).
+    private(set) var pendingUploads = 0
 
     /// True once the rep is signed in to EcoProposal Cloud on this iPad.
     var isActive: Bool { context != nil && profile != nil }
@@ -507,6 +509,19 @@ final class CloudSync {
         var firstError: String?
         func note(_ error: Error) { if firstError == nil { firstError = error.localizedDescription } }
 
+        // Count what's waiting so the list can show "Uploading… N left".
+        let allProposals = (try? context.fetch(FetchDescriptor<Proposal>())) ?? []
+        let allNumbers = Dictionary(
+            allProposals.filter { !$0.proposalNumber.isEmpty }.map { ($0.proposalNumber, $0.id) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        var pending = Set(allProposals.filter { needsUpload($0, numbers: allNumbers) }.map(\.id))
+        pendingUploads = pending.count
+        defer {
+            let remaining = allProposals.filter { pending.contains($0.id) && needsUpload($0, numbers: allNumbers) }
+            pendingUploads = remaining.count
+        }
+
         // 1. Customers
         for c in (try? context.fetch(FetchDescriptor<Customer>())) ?? [] {
             let payload = customerPayload(c)
@@ -570,6 +585,8 @@ final class CloudSync {
         for p in proposals where state.stored.proposalIDs.contains(p.id) && canEdit(p.id) && !conflicts.contains(p.id) {
             do {
                 try await pushFiles(for: p, profile: profile)
+                pending.remove(p.id)
+                pendingUploads = pending.count
             } catch { note(error) }
         }
 
@@ -648,6 +665,24 @@ final class CloudSync {
         }
         // The fingerprint of what was sent (not of the live model, which the rep may still be typing into).
         state.stored.proposalFingerprints[p.id] = fp
+    }
+
+    // MARK: - Pending uploads
+
+    /// True when a proposal still has something this iPad needs to send.
+    private func needsUpload(_ p: Proposal, numbers: [String: UUID]) -> Bool {
+        let st = state.stored
+        let tracked = st.proposalIDs.contains(p.id)
+        if conflicts.contains(p.id) { return false }          // shown separately
+        if !tracked { return true }
+        if !canEdit(p.id) { return false }                     // not ours to send
+        if let stored = st.proposalFingerprints[p.id], stored != proposalFingerprint(p, numberToID: numbers) { return true }
+        if p.photos.contains(where: { !st.uploadedPhotoImages.contains($0.id) || st.photoFingerprints[$0.id] != Self.photoFingerprint($0) }) { return true }
+        if p.documents.contains(where: { !st.uploadedDocuments.contains($0.id) }) { return true }
+        if st.sketchFingerprints[p.id] != Self.sketchFingerprint(p) { return true }
+        if p.customerSignatureData != nil, !st.uploadedSignatures.contains("\(p.id.uuidString):customer") { return true }
+        if p.salesSignatureData != nil, !st.uploadedSignatures.contains("\(p.id.uuidString):sales_rep") { return true }
+        return false
     }
 
     // MARK: - Payloads

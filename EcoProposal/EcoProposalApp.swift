@@ -22,12 +22,12 @@ struct EcoProposalApp: App {
         do {
             return try ModelContainer(for: schema, configurations: [configuration])
         } catch {
-            // Phase-1 fallback: schema changed and the on-disk store is incompatible.
-            // Wipe the old store files and rebuild so the app can launch. Fine for a
-            // pre-production tool with no valuable local data yet — will be replaced
-            // with a proper VersionedSchema migration once we ship to reps.
-            print("SwiftData: rebuilding container after schema mismatch — \(error)")
-            deleteExistingStore(for: configuration)
+            // The on-disk store couldn't be opened (e.g. an incompatible model change).
+            // Never delete reps' data: move the old store aside into
+            // Application Support/StoreBackups/<timestamp>/ and start fresh.
+            // Proposals already in EcoProposal Cloud download again on the next sync.
+            print("SwiftData: backing up and rebuilding container after open failure — \(error)")
+            backUpAndRemoveStore(for: configuration)
             do {
                 return try ModelContainer(for: schema, configurations: [configuration])
             } catch {
@@ -60,17 +60,29 @@ struct EcoProposalApp: App {
     }
 }
 
-/// Removes the SwiftData store files at the configuration's URL so a fresh container can be created.
-/// SwiftData writes `.store`, `.store-wal`, and `.store-shm` alongside the primary file.
-private func deleteExistingStore(for configuration: ModelConfiguration) {
+/// Moves the SwiftData store files (`.store`, `-wal`, `-shm`) into a timestamped
+/// backup folder so a fresh container can be created without losing anything.
+private func backUpAndRemoveStore(for configuration: ModelConfiguration) {
+    let fm = FileManager.default
     let baseURL = configuration.url
+    let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+    let backupDir = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent("StoreBackups", isDirectory: true)
+        .appendingPathComponent(stamp, isDirectory: true)
+    try? fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
+
     let candidates = [
         baseURL,
+        URL(fileURLWithPath: baseURL.path + "-wal"),
+        URL(fileURLWithPath: baseURL.path + "-shm"),
         baseURL.appendingPathExtension("wal"),
         baseURL.appendingPathExtension("shm"),
     ]
-    for url in candidates {
-        try? FileManager.default.removeItem(at: url)
+    for url in candidates where fm.fileExists(atPath: url.path) {
+        let destination = backupDir.appendingPathComponent(url.lastPathComponent)
+        if (try? fm.moveItem(at: url, to: destination)) == nil {
+            try? fm.removeItem(at: url)  // last resort so the app can still launch
+        }
     }
 }
 
