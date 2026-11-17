@@ -4,6 +4,7 @@ import MSAL
 
 @main
 struct EcoProposalApp: App {
+    @State private var showLaunchSting = true
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Customer.self,
@@ -38,6 +39,7 @@ struct EcoProposalApp: App {
 
     var body: some Scene {
         WindowGroup {
+          ZStack {
             // Everything sits behind the Microsoft 365 login gate — only
             // @ecosealsolutions.com accounts can open the app.
             AuthGateView {
@@ -55,6 +57,16 @@ struct EcoProposalApp: App {
                 // Make sure the standard sales brochures are in the literature library.
                 BundledLiterature.seed(into: sharedModelContainer.mainContext)
             }
+
+            // EcoPRO logo sting on launch, then it fades away to reveal the app.
+            if showLaunchSting {
+                LaunchStingView {
+                    withAnimation(.easeIn(duration: 0.3)) { showLaunchSting = false }
+                }
+                .transition(.opacity)
+                .zIndex(1)
+            }
+          }
         }
         .modelContainer(sharedModelContainer)
     }
